@@ -20,7 +20,7 @@ class CdkLab3Stack(Stack):
                 "def handler(event, context):\n"
                 "    return {\n"
                 "        'statusCode': 200,\n"
-                "        'body': 'Hello from Lambda via API Gateway!'\n"
+                "        'body': 'Hello from Lambda via AWS CodePipeline!'\n"
                 "    }"
             ),
         )
