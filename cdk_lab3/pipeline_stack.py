@@ -62,7 +62,7 @@ class PipelineStack(Stack):
         # 🔹 Deploy Stage - Auto deploy CloudFormation
         deploy_action = cp_actions.CloudFormationCreateUpdateStackAction(
             action_name="Deploy",
-            template_path=build_output.at_path("**/*.template.json"),
+            template_path=build_output.at_path("CdkLab3Stack.template.json"),
             stack_name="CdkLab3Stack",
             admin_permissions=True,
         )
