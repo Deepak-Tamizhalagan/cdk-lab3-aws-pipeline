@@ -6,25 +6,25 @@ from aws_cdk import (
     aws_iam as iam,
 )
 from constructs import Construct
-import os
+
 
 class PipelineStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, github_repo: str, github_branch: str, codestar_arn: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # 🔹 Source Stage - Get code from GitHub using CodeStar connection
+        # 🔹 Source Stage (GitHub via CodeStar Connection)
         source_output = codepipeline.Artifact()
         source_action = cp_actions.CodeStarConnectionsSourceAction(
             action_name="GitHub_Source",
-            owner="Deepak-Tamizhalagan",    # 🔹 your GitHub username
-            repo=github_repo,               # eg: "cdk-lab3-aws-pipeline"
-            branch=github_branch,           # eg: "main"
-            connection_arn=codestar_arn,    # 🔹 To be created in AWS Console
+            owner="Deepak-Tamizhalagan",
+            repo=github_repo,
+            branch=github_branch,
+            connection_arn=codestar_arn,
             output=source_output,
         )
 
-        # 🔹 Build Stage - Synth CDK using CodeBuild
+        # 🔹 Build Stage (Synth CDK using CodeBuild)
         build_project = codebuild.PipelineProject(
             self, "BuildProject",
             environment=dict(
@@ -45,8 +45,10 @@ class PipelineStack(Stack):
                         ]
                     }
                 },
+                # 🔥 FIXED: Only upload templates from cdk.out
                 "artifacts": {
-                    "files": ["**/*"]
+                    "base-directory": "cdk.out",
+                    "files": ["CdkLab3Stack.template.json"]
                 }
             }),
         )
@@ -59,7 +61,7 @@ class PipelineStack(Stack):
             outputs=[build_output],
         )
 
-        # 🔹 Deploy Stage - Auto deploy CloudFormation
+        # 🔹 Deploy Stage (Deploy CloudFormation template)
         deploy_action = cp_actions.CloudFormationCreateUpdateStackAction(
             action_name="Deploy",
             template_path=build_output.at_path("CdkLab3Stack.template.json"),
@@ -67,11 +69,11 @@ class PipelineStack(Stack):
             admin_permissions=True,
         )
 
-        # 🔹 Define Pipeline with Stages
+        # 🔹 Pipeline Stages
         pipeline = codepipeline.Pipeline(self, "CDKPipeline",
             stages=[
                 codepipeline.StageProps(stage_name="Source", actions=[source_action]),
                 codepipeline.StageProps(stage_name="Build", actions=[build_action]),
-                codepipeline.StageProps(stage_name="Deploy", actions=[deploy_action])
+                codepipeline.StageProps(stage_name="Deploy", actions=[deploy_action]),
             ]
         )
