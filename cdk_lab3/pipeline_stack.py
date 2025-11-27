@@ -22,28 +22,29 @@ class PipelineStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # ===============================
-        # Source Stage – GitHub
+        #  Source Stage - GitHub
         # ===============================
         source_output = codepipeline.Artifact()
 
         source_action = cp_actions.CodeStarConnectionsSourceAction(
             action_name="GitHub_Source",
-            owner="Deepak-Tamizhalagan",     # GitHub username
-            repo=github_repo,               # "cdk-lab3-aws-pipeline"
-            branch=github_branch,           # "main"
-            connection_arn=codestar_arn,    # Codestar connection ARN
+            owner="Deepak-Tamizhalagan",  # GitHub username
+            repo=github_repo,
+            branch=github_branch,
+            connection_arn=codestar_arn,
             output=source_output,
         )
 
         # ===============================
-        # Build Stage – CDK Synth
+        #  Build Stage - CDK Synth
         # ===============================
         build_project = codebuild.PipelineProject(
             self,
             "BuildProject",
             environment=codebuild.BuildEnvironment(
                 build_image=codebuild.LinuxBuildImage.STANDARD_7_0,
-                privileged=True  
+                privileged=True,
+            ),
             build_spec=codebuild.BuildSpec.from_object({
                 "version": "0.2",
                 "phases": {
@@ -60,12 +61,10 @@ class PipelineStack(Stack):
                     }
                 },
                 "artifacts": {
-                    "base-directory": "cdk.out",  # 👈 Location of templates
-                    "files": [
-                        "CdkLab3Stack.template.json"
-                    ]
+                    "base-directory": "cdk.out",
+                    "files": ["CdkLab3Stack.template.json"]
                 }
-            }),
+            })
         )
 
         build_output = codepipeline.Artifact()
@@ -78,7 +77,7 @@ class PipelineStack(Stack):
         )
 
         # ===============================
-        # Deploy Stage – CloudFormation
+        #  Deploy Stage - CloudFormation
         # ===============================
         deploy_role = iam.Role(
             self, "PipelineDeploymentRole",
@@ -97,14 +96,14 @@ class PipelineStack(Stack):
         )
 
         # ===============================
-        # Pipeline setup
+        #  Final Pipeline Setup
         # ===============================
-        pipeline = codepipeline.Pipeline(
+        codepipeline.Pipeline(
             self,
             "CDKPipeline",
             stages=[
                 codepipeline.StageProps(stage_name="Source", actions=[source_action]),
                 codepipeline.StageProps(stage_name="Build", actions=[build_action]),
                 codepipeline.StageProps(stage_name="Deploy", actions=[deploy_action]),
-            ],
+            ]
         )
