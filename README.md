@@ -1,58 +1,53 @@
+# Lab 3 – AWS CDK Infrastructure + CodePipeline CI/CD Automation
 
-# Welcome to your CDK Python project!
+This lab demonstrates automated deployment of AWS infrastructure using **AWS CDK (Python)** and **AWS CodePipeline** integrated with GitHub.
 
-This is a blank project for CDK development with Python.
+## 🔹 1. Infrastructure Setup (CdkLab3Stack)
+- Created CDK project using: `cdk init --language python`
+- Defined **Lambda function** with simple JSON return
+- Added **API Gateway REST API** with endpoint `GET /hello`
+- Linked API to Lambda via proxy integration
+- Successfully validated using `cdk synth` and `cdk deploy`
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+<img width="760" height="217" alt="image" src="https://github.com/user-attachments/assets/da991c76-99d2-4280-a828-d004c80a95f4" />
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
 
-To manually create a virtualenv on MacOS and Linux:
+---
 
-```
-$ python -m venv .venv
-```
+## 🔹 2. GitHub Integration
+- Created repo: `cdk-lab3-aws-pipeline`
+- Added CodeStar connection to GitHub (status: *Available*)
+- Pipeline configured to trigger on pushing to `main` branch
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+<img width="1038" height="687" alt="image" src="https://github.com/user-attachments/assets/b9bcf1f7-e612-4cbc-a9d4-b7dc394aded8" />
 
-```
-$ source .venv/bin/activate
-```
 
-If you are a Windows platform, you would activate the virtualenv like this:
+---
 
-```
-% .venv\Scripts\activate.bat
-```
+## 🔹 3. CI/CD Pipeline (PipelineStack)
+- Source Stage: Fetches code from GitHub via CodeStar
+- Build Stage: CodeBuild runs:
+  ```bash
+  npm install -g aws-cdk
+  pip install -r requirements.txt
+  cdk synth
+  ```
+  <img width="1890" height="707" alt="image" src="https://github.com/user-attachments/assets/4ed7fa6f-c971-48d5-923b-9a64ff763095" />
 
-Once the virtualenv is activated, you can install the required dependencies.
+## 🔹4. Verification
 
-```
-$ pip install -r requirements.txt
-```
+API tested via Postman → returned "Hello from Lambda via API Gateway!"
 
-At this point you can now synthesize the CloudFormation template for this code.
+Logs observed in CodePipeline & CloudBuild
 
-```
-$ cdk synth
-```
+Manual cdk deploy confirmed working deployment
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+## 🔹 5. Cleanup
 
-## Useful commands
+Resources removed using cdk destroy
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+Confirmed deletion of Lambda, API Gateway, and stacks
+<img width="685" height="127" alt="image" src="https://github.com/user-attachments/assets/e0557fd9-cd80-40d6-ac1d-d1c9c6ec4db1" />
+<img width="673" height="132" alt="image" src="https://github.com/user-attachments/assets/0e14d42d-5450-4067-827b-7bea5858053a" />
 
-Enjoy!
+
