@@ -27,9 +27,9 @@ class PipelineStack(Stack):
 
         source_action = cp_actions.CodeStarConnectionsSourceAction(
             action_name="GitHub_Source",
-            owner="Deepak-Tamizhalagan",     
-            repo=github_repo,               # "cdk-lab3-aws-pipeline"
-            branch=github_branch,           #  "main"
+            owner="Deepak-Tamizhalagan",     # GitHub username
+            repo=github_repo,               # e.g. "cdk-lab3-aws-pipeline"
+            branch=github_branch,           # e.g. "main"
             connection_arn=codestar_arn,    # CodeStar connection ARN
             output=source_output,
         )
@@ -58,14 +58,16 @@ class PipelineStack(Stack):
                             "mkdir -p output",
                             # synth only the app stack into ONE file
                             "cdk synth CdkLab3Stack > output/CdkLab3Stack.template.json",
+                            # debug: show files so we can see them in logs
+                            "echo '--- FILES AFTER SYNTH ---'",
+                            "ls -R",
                         ]
                     },
                 },
                 "artifacts": {
-                    # publish only our custom folder
-                    "base-directory": "output",
+                    # include exactly this path in build artifact
                     "files": [
-                        "CdkLab3Stack.template.json",
+                        "output/CdkLab3Stack.template.json",
                     ],
                 },
             }),
@@ -86,8 +88,8 @@ class PipelineStack(Stack):
         deploy_action = cp_actions.CloudFormationCreateUpdateStackAction(
             action_name="Deploy",
             stack_name="CdkLab3Stack",
-            # read the file we just created in /output
-            template_path=build_output.at_path("CdkLab3Stack.template.json"),
+            # must match path inside artifact exactly
+            template_path=build_output.at_path("output/CdkLab3Stack.template.json"),
             admin_permissions=True,
         )
 
